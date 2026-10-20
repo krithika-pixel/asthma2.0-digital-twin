@@ -65,7 +65,7 @@ export default function AnatomicalLungViewer({
 
   // Dynamic patient-specific pins
   const isWheezing = currentObservation?.wheezing === 1;
-  const hasAirTrapping = pefDropPct >= 15;
+  const hasModeledFlowChange = pefDropPct >= 15;
 
   const pins = [
     {
@@ -95,15 +95,15 @@ export default function AnatomicalLungViewer({
     {
       id: 'left_lung',
       title: 'Left Lung',
-      subtitle: hasAirTrapping ? 'Air Trapping [Simulated]' : 'Adequate Ventilation',
+      subtitle: hasModeledFlowChange ? 'Modeled airflow change [Simulated]' : 'No modeled airflow change',
       x: '66%',
       y: '62%',
-      status: hasAirTrapping ? 'alert' : 'normal',
-      dotColor: hasAirTrapping ? '#ef4444' : '#22c55e',
-      alert: hasAirTrapping,
-      detail: hasAirTrapping 
-        ? `Synthetic airflow limitation modeled with dynamic expiratory delay (${pefDropPct}% below baseline reference).`
-        : 'Normal regional ventilation dynamics.'
+      status: hasModeledFlowChange ? 'warning' : 'normal',
+      dotColor: hasModeledFlowChange ? '#f59e0b' : '#22c55e',
+      alert: false,
+      detail: hasModeledFlowChange
+        ? `Illustrative airflow model response to a ${pefDropPct}% PEF decrease from baseline. This is not an imaging finding.`
+        : 'Illustrative model only; not derived from CT image data.'
     }
   ];
 
@@ -127,6 +127,9 @@ export default function AnatomicalLungViewer({
             </button>
           ))}
         </div>
+        <div style={{ padding: '6px 14px', background: '#eff6ff', color: '#1e3a8a', fontSize: 10 }}>
+          Illustrative synthetic anatomy; not CT-derived and not airway segmentation.
+        </div>
       </div>
 
       {/* Card Body: Anatomical Viewer on Left, Lung Function on Right */}
@@ -146,7 +149,7 @@ export default function AnatomicalLungViewer({
                   <linearGradient id="tracheaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#38bdf8" />
                     <stop offset="70%" stopColor="#0284c7" />
-                    <stop offset="100%" stopColor={isWheezing ? "#f59e0b" : "#38bdf8"} />
+                    <stop offset="100%" stopColor="#38bdf8" />
                   </linearGradient>
 
                   <linearGradient id="rightLungGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -156,9 +159,9 @@ export default function AnatomicalLungViewer({
                   </linearGradient>
 
                   <linearGradient id="leftLungGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={hasAirTrapping ? "#fb7185" : "#38bdf8"} stopOpacity="0.85" />
-                    <stop offset="40%" stopColor={hasAirTrapping ? "#e11d48" : "#0284c7"} stopOpacity="0.6" />
-                    <stop offset="100%" stopColor={hasAirTrapping ? "#881337" : "#1e3a8a"} stopOpacity="0.3" />
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.85" />
+                    <stop offset="40%" stopColor="#0284c7" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.3" />
                   </linearGradient>
 
                   <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -194,11 +197,11 @@ export default function AnatomicalLungViewer({
                   onClick={() => onSelectAnnotation && onSelectAnnotation(pins[1])}
                 />
 
-                {/* Left Lung (Viewer's right - Air Trapping Highlight if PEF dropped) */}
+                {/* Illustrative generic lung; no image-based segmentation is applied. */}
                 <path
                   d="M 215 155 C 230 135, 260 130, 285 150 C 320 180, 335 240, 330 300 C 325 350, 290 390, 250 395 C 225 398, 215 360, 215 320 Z"
                   fill="url(#leftLungGrad)"
-                  stroke={hasAirTrapping ? "#fb7185" : "#38bdf8"}
+                  stroke="#38bdf8"
                   strokeWidth="1.5"
                   filter="url(#neonGlow)"
                   style={{ cursor: 'pointer', transition: 'all 0.3s' }}
@@ -220,13 +223,13 @@ export default function AnatomicalLungViewer({
 
                 {/* Main Bronchi */}
                 <path d="M 200 170 Q 170 190 140 220" stroke="#38bdf8" strokeWidth="4" fill="none" strokeLinecap="round" />
-                <path d="M 200 170 Q 230 190 260 220" stroke={hasAirTrapping ? "#f43f5e" : "#38bdf8"} strokeWidth="4" fill="none" strokeLinecap="round" />
+                <path d="M 200 170 Q 230 190 260 220" stroke="#38bdf8" strokeWidth="4" fill="none" strokeLinecap="round" />
 
                 {/* Secondary branches */}
                 <path d="M 155 205 Q 120 220 100 250" stroke="#0284c7" strokeWidth="2.5" fill="none" />
                 <path d="M 140 220 Q 130 260 120 310" stroke="#0284c7" strokeWidth="2" fill="none" />
-                <path d="M 245 205 Q 280 220 300 250" stroke={hasAirTrapping ? "#e11d48" : "#0284c7"} strokeWidth="2.5" fill="none" />
-                <path d="M 260 220 Q 270 260 280 310" stroke={hasAirTrapping ? "#e11d48" : "#0284c7"} strokeWidth="2" fill="none" />
+                <path d="M 245 205 Q 280 220 300 250" stroke="#0284c7" strokeWidth="2.5" fill="none" />
+                <path d="M 260 220 Q 270 260 280 310" stroke="#0284c7" strokeWidth="2" fill="none" />
 
                 {/* Dynamic Airflow particles */}
                 <circle cx="200" cy="110" r="2.5" fill="#ffffff" opacity="0.9">
@@ -255,62 +258,41 @@ export default function AnatomicalLungViewer({
             </div>
           )}
 
-          {/* TAB 2: CT SCAN VIEW (Patient-Specific or Informative Empty State) */}
+          {/* TAB 2: CT imaging metadata only */}
           {activeTab === 'CT Scan' && (
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1e293b', paddingBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38bdf8', fontSize: 13, fontWeight: 700 }}>
                   <Scan size={15} />
-                  <span>Thoracic Diagnostic Imaging Study</span>
+                  <span>CT Imaging</span>
                 </div>
-                <span className="status-pill normal" style={{ fontSize: 10 }}>Synthea FHIR</span>
+                <span className="status-pill normal" style={{ fontSize: 10 }}>Local viewer</span>
               </div>
 
-              {imagingData?.has_imaging && imagingData?.primary_scan ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}>
-                  <div style={{ background: '#020617', border: '1px solid #334155', borderRadius: 8, padding: 14 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>
-                          {imagingData.primary_scan.modality || 'CT'} Chest (Thorax)
-                        </div>
-                        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                          Study Date: {imagingData.primary_scan.study_date ? new Date(imagingData.primary_scan.study_date).toLocaleDateString() : 'Recorded in EHR'} • {imagingData.primary_scan.slice_count || 3} Axial Slices
-                        </div>
-                      </div>
-                      <span className="status-pill warning" style={{ fontSize: 10 }}>Verified Study</span>
-                    </div>
-
-                    <div style={{ fontSize: 11.5, color: '#cbd5e1', marginTop: 10, lineHeight: 1.4 }}>
-                      <strong>Impression:</strong> {imagingData.primary_scan.impression || imagingData.primary_scan.findings}
-                    </div>
-                  </div>
-
-                  <button 
-                    className="btn-ehr-view"
-                    style={{ background: '#2563eb', color: '#fff', width: '100%', justifyContent: 'center' }}
-                    onClick={() => onOpenViewer && onOpenViewer()}
-                  >
-                    <Layers size={14} />
-                    <span>Open High-Resolution DICOM / CT Viewer</span>
-                  </button>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px', gap: 10 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+                  <Scan size={22} />
                 </div>
-              ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', marginBottom: 12 }}>
-                    <Scan size={22} />
-                  </div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
-                    No imaging study available for this patient.
-                  </div>
-                  <div style={{ fontSize: 11, color: '#64748b', maxWidth: 280, lineHeight: 1.4 }}>
-                    This patient record ({patient?.patient_id || 'Selected Patient'}) contains no imported CT chest scans or thoracic radiographs in their longitudinal EHR.
-                  </div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#e2e8f0' }}>
+                  No scan pixels are loaded.
                 </div>
-              )}
+                <div style={{ fontSize: 11, color: '#94a3b8', maxWidth: 280, lineHeight: 1.5 }}>
+                  {imagingData?.has_imaging
+                    ? 'The EHR entry provides study metadata only; it does not include viewable image files.'
+                    : 'Upload DICOM or image files to review the actual slices. A single image is not treated as a 3D volume.'}
+                </div>
+                <button
+                  className="btn-ehr-view"
+                  style={{ background: '#2563eb', color: '#fff', justifyContent: 'center' }}
+                  onClick={() => onOpenViewer && onOpenViewer()}
+                >
+                  <Layers size={14} />
+                  <span>Open CT Imaging</span>
+                </button>
+              </div>
 
               <div style={{ fontSize: 9.5, color: '#64748b', borderTop: '1px solid #1e293b', paddingTop: 6 }}>
-                Provenance: Synthea HL7 FHIR ImagingStudy Resource. Only genuine imported scans are displayed.
+                EHR imaging metadata is distinct from the scan image data.
               </div>
             </div>
           )}

@@ -314,6 +314,9 @@ export default function HistoricalEHRView({ patientId, ehrData, labsData, imagin
             </div>
           </div>
           <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ padding: '10px 12px', borderRadius: 8, background: '#eff6ff', color: '#1e3a8a', fontSize: 11, lineHeight: 1.5 }}>
+              This section lists EHR study metadata only. It does not contain or display CT image pixels or radiology findings.
+            </div>
             {scans.map((scan, i) => (
               <div 
                 key={i} 
@@ -329,10 +332,10 @@ export default function HistoricalEHRView({ patientId, ehrData, labsData, imagin
               >
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)' }}>
-                    {scan.modality} Chest • {scan.study_date ? new Date(scan.study_date).toLocaleDateString() : '12 Mar 2026'}
+                    {scan.modality || 'Imaging'} study • {scan.study_date ? new Date(scan.study_date).toLocaleDateString() : 'Study date not recorded'}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {scan.findings || scan.description}
+                    Metadata record only{scan.is_synthetic_demonstration ? ' · synthetic demonstration metadata' : ''}
                   </div>
                 </div>
 
@@ -341,10 +344,15 @@ export default function HistoricalEHRView({ patientId, ehrData, labsData, imagin
                   onClick={onOpenCTViewer}
                 >
                   <Layers size={13} />
-                  <span>Launch DICOM Viewer</span>
+                  <span>Open CT Imaging</span>
                 </button>
               </div>
             ))}
+            {scans.length === 0 && (
+              <div style={{ padding: '18px', color: 'var(--text-muted)', fontSize: 12 }}>
+                No imaging study metadata is recorded for this patient.
+              </div>
+            )}
           </div>
         </div>
       )}

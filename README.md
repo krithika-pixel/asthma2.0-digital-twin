@@ -205,13 +205,21 @@ Open your browser to `http://127.0.0.1:8000`.
 
 ---
 
-## 9. Demonstrating Primary Features
+## 9. CT Imaging Viewer
+
+The dashboard's **CT Imaging** section accepts local DICOM (`.dcm` / `.dicom`) files and browser-readable standard images (including PNG, JPEG, and WebP). It supports slice navigation, zoom, pan, and display level/width controls. DICOM window presets are available for DICOM pixels; standard images use brightness/contrast controls.
+
+Multiplanar axial, coronal, and sagittal views are enabled only for compatible uncompressed little-endian DICOM volumes: either a multi-frame file with usable slice-spacing metadata or a series of slices with matching series, dimensions, spacing, orientation, and regular slice spacing. Compressed DICOM transfer syntaxes are not supported. Other uploads are shown as individual 2D images; a standard image is never treated as a 3D CT volume. Uploads are processed in the browser and are not saved or sent to the backend. The viewer does not generate radiology findings or perform airway segmentation.
+
+The synthetic EHR may contain ImagingStudy metadata, but it does not include the underlying scan pixels. The anatomical lung illustration elsewhere in the dashboard is generic and is not derived from CT data. No sample CT scan is bundled.
+
+## 10. Demonstrating Primary Features
 
 The doctor-facing dashboard provides an integrated, professional clinical workflow:
-* **Anatomical Respiratory Visualizer:** 3 distinct sub-tabs (Lungs with regional ventilation dynamics, CT Scan with DICOM study viewer, and 3D View with rotatable thoracic ribcage model).
+* **Anatomical Respiratory Visualizer:** 3 distinct sub-tabs (Lungs with illustrative regional ventilation dynamics, CT Imaging metadata, and 3D View with rotatable generic thoracic model).
 * **Future-Event Prediction Card:** Displays 2-hour deterioration probability (e.g., 19% Low / 96% High), model confidence score, delta vs. previous observation, and top contributing feature bars.
 * **Diagnostic Lab Reports:** Complete genuine panels (Eosinophils, Total IgE, CRP, Vitamin D, Serum IgA) with reference ranges and abnormal flags parsed from Synthea FHIR records.
-* **Diagnostic CT Chest Viewer Modal:** High-resolution axial CT chest slices with window presets (Lung -600/1500 vs Mediastinal 40/400), slice navigation slider, orientation markers, and diagnostic radiology report.
+* **CT Imaging:** Local DICOM and image-file viewer with slice navigation, zoom, pan, and window/level or image brightness/contrast controls. Compatible DICOM volumes can be viewed axially, coronally, and sagittally.
 * **Pulse Oximeter Module:** Interactive dual-mode interface (Mode A simulated BLE stream vs Mode B hardware Bluetooth SIG `0x1822` adapter standby), plethysmograph waveform, and clinical caution notes.
 * **Innovation A: Personalized Environmental Trigger Fingerprint:** Multi-lag (30m, 1h, 2h, 6h) statistical correlation table with Indian urban air quality intelligence (Bengaluru, Delhi, Mumbai, Kolkata, Hyderabad) with non-causal language.
 * **Innovation B: Evidence-Traceable Prediction Audit Log:** Cutoff timestamps, immutable feature attributions, and post-horizon ground-truth outcome resolution (`Awaiting future observations`, `Event observed`, `Event not observed`).
@@ -222,7 +230,7 @@ The doctor-facing dashboard provides an integrated, professional clinical workfl
 
 ---
 
-## 10. Automated Test Suite
+## 11. Automated Test Suite
 
 Run the full pytest suite:
 ```bash

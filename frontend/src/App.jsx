@@ -12,6 +12,7 @@ import {
   UserCheck, 
   Search, 
   X,
+  Scan,
   ChevronDown, 
   Plus, 
   Play, 
@@ -28,7 +29,6 @@ import FutureEventPredictionCard from './components/FutureEventPredictionCard';
 import LabReportsCard from './components/LabReportsCard';
 import ChestCTScanCard from './components/ChestCTScanCard';
 import EnvironmentalExposureCard from './components/EnvironmentalExposureCard';
-import CTViewerModal from './components/CTViewerModal';
 import ExplanationModal from './components/ExplanationModal';
 
 import LiveMonitoringView from './views/LiveMonitoringView';
@@ -40,6 +40,7 @@ import ModelEvaluationView from './views/ModelEvaluationView';
 import HistoricalEHRView from './views/HistoricalEHRView';
 import ClinicianFeedbackView from './views/ClinicianFeedbackView';
 import DataSourcesView from './views/DataSourcesView';
+import CTImagingView from './views/CTImagingView';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Overview');
@@ -66,7 +67,6 @@ export default function App() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Modals state
-  const [isCTViewerOpen, setIsCTViewerOpen] = useState(false);
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
 
@@ -227,10 +227,11 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isPlaying, playbackSpeed, selectedPatientId]);
 
-  // Clean Navigation items (Imaging & Reports removed as redundant per specifications)
+  // Navigation items
   const navItems = [
     { id: 'Overview', label: 'Overview', icon: Activity },
     { id: 'Patient Profile', label: 'Patient Profile', icon: User },
+    { id: 'CT Imaging', label: 'CT Imaging', icon: Scan },
     { id: 'Live Monitoring', label: 'Live Monitoring', icon: Activity },
     { id: 'Predictions', label: 'Predictions', icon: TrendingUp },
     { id: 'Environmental Analysis', label: 'Environmental Analysis', icon: Wind },
@@ -295,9 +296,9 @@ export default function App() {
         action: () => { setActiveNav('Patient Profile'); setSearchQuery(''); setIsSearchFocused(false); }
       },
       {
-        title: 'Diagnostic Chest CT Scan',
-        subtitle: 'High-resolution DICOM slices & bronchial wall evaluation',
-        action: () => { setIsCTViewerOpen(true); setSearchQuery(''); setIsSearchFocused(false); }
+        title: 'CT Imaging',
+        subtitle: 'Upload and review local DICOM or image files',
+        action: () => { setActiveNav('CT Imaging'); setSearchQuery(''); setIsSearchFocused(false); }
       },
       {
         title: 'Blood Serology & Allergen Labs (IgE, Eosinophils)',
@@ -488,6 +489,16 @@ export default function App() {
           </div>
 
           <div className="top-navbar-actions">
+            <button
+              className={`top-nav-ct-button ${activeNav === 'CT Imaging' ? 'active' : ''}`}
+              onClick={() => setActiveNav('CT Imaging')}
+              aria-current={activeNav === 'CT Imaging' ? 'page' : undefined}
+              title="Open CT Imaging"
+            >
+              <Scan size={16} />
+              <span>CT Imaging</span>
+            </button>
+
             {/* Simulation Status Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginRight: 6 }}>
               <span style={{ 
@@ -631,7 +642,7 @@ export default function App() {
                   monitoringHistory={monitoringHistory}
                   onSelectAnnotation={(pin) => setSelectedAnnotation(pin)}
                   selectedPin={selectedAnnotation}
-                  onOpenViewer={() => setIsCTViewerOpen(true)}
+                  onOpenViewer={() => setActiveNav('CT Imaging')}
                 />
 
                 <FutureEventPredictionCard
@@ -650,7 +661,7 @@ export default function App() {
 
                 <ChestCTScanCard
                   imagingData={imagingData}
-                  onOpenViewer={() => setIsCTViewerOpen(true)}
+                  onOpenViewer={() => setActiveNav('CT Imaging')}
                 />
 
                 <EnvironmentalExposureCard
@@ -670,8 +681,12 @@ export default function App() {
               ehrData={ehrData}
               labsData={labsData}
               imagingData={imagingData}
-              onOpenCTViewer={() => setIsCTViewerOpen(true)}
+              onOpenCTViewer={() => setActiveNav('CT Imaging')}
             />
+          )}
+
+          {activeNav === 'CT Imaging' && (
+            <CTImagingView key={selectedPatientId} patientId={selectedPatientId} />
           )}
 
           {activeNav === 'Live Monitoring' && (
@@ -743,13 +758,6 @@ export default function App() {
           )}
         </main>
       </div>
-
-      {/* Diagnostic Chest CT Viewer Modal */}
-      <CTViewerModal
-        isOpen={isCTViewerOpen}
-        onClose={() => setIsCTViewerOpen(false)}
-        patientId={selectedPatientId}
-      />
 
       {/* Future-Event Prediction Explanation Modal */}
       <ExplanationModal
