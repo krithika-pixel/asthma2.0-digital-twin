@@ -333,9 +333,9 @@ class FHIRParser:
             if im.get("modality"):
                 modality = im["modality"][0].get("code", "CT")
             study_date = parse_date(im.get("started"))
-            desc = im.get("description", "High-Resolution Chest CT Scan")
-            impression = im.get("reasonCode", [{}])[0].get("text", "Mild air trapping with bronchial wall thickening. No consolidation.")
-            slices = im.get("numberOfInstances", 3)
+            desc = im.get("description", "")
+            impression = ""
+            slices = im.get("numberOfInstances")
 
             imaging_records.append(ImagingRecord(
                 id=im_id,

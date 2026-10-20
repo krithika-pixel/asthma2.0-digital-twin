@@ -90,7 +90,7 @@ class ImagingRecord(BaseModel):
     study_date: Optional[datetime] = None
     findings: str
     impression: str
-    slice_count: int = 1
+    slice_count: Optional[int] = None
     image_url: Optional[str] = None
     thumbnail_urls: List[str] = Field(default_factory=list)
     is_synthetic_demonstration: bool = True
@@ -127,4 +127,3 @@ class NormalizedEHRProfile(BaseModel):
             "Clinical Personal Best PEF": f"{self.asthma_history.clinical_personal_best_pef} L/min" if self.asthma_history.clinical_personal_best_pef else "Not recorded",
             "Source": f"{self.provenance_source} ({'Illustrative Demo Profile' if self.is_demo_profile else 'Imported Record'})",
         }
-
